@@ -1,0 +1,85 @@
+# =========================
+# PYTHON
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# =========================
+# JUPYTER
+# =========================
+.ipynb_checkpoints
+
+# =========================
+# VS CODE
+# =========================
+.vscode/
+
+# =========================
+# SYSTEM FILES
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# DATA FILES (à adapter selon ton projet)
+# =========================
+# Raster / LIDAR / gros fichiers
+*.tif
+*.tiff
+*.las
+*.laz
+*.grd
+*.gri
+
+# Outputs
+outputs/
+results/
+figures/
+
+# csv/parquet 
+
+data/raw/*.csv
+data/raw/*.parquet
+data/raw/*.txt
+data/raster/*.tif
+occurences.csv
+
+
+# =========================
+# KEEP OSO MAPPING FILE
+# =========================
+
+!data/raw/oso_2024_mapping.csv
+!data/processed/taxref_species_vernacular_mapping.csv
+!data/processed/tetras_oso.csv
+

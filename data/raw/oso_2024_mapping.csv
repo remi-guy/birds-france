@@ -1,0 +1,24 @@
+code;label_fr;label_en
+1;Zone urbaine dense;Dense built-up area
+2;Zone urbaine diffuse;Diffuse built-up area
+3;Zone industrielle et commerciale;Industrial and commercial areas
+4;Routes;Roads
+5;Oléagineux (colza);Oilseeds (e.g. rapeseed)
+6;Céréales à paille;Straw cereals (wheat, barley, etc.)
+7;Protéagineux;Protein crops (beans / peas)
+8;Soja;Soy
+9;Tournesol;Sunflower
+10;Maïs;Corn
+11;Riz;Rice
+12;Tubercules / racines;Tubers / roots
+13;Prairies;Grasslands
+14;Vergers;Orchards and fruit growing
+15;Vignes;Vineyards
+16;Forêt de feuillus;Hardwood forest
+17;Forêt de conifères;Softwood forest
+18;Prairies naturelles;Natural grasslands and pastures
+19;Landes ligneuses / broussailles;Woody moorlands
+20;Surfaces minérales naturelles;Natural mineral surfaces
+21;Plages et dunes;Beaches and dunes
+22;Glaciers / neiges éternelles;Glaciers and eternal snow
+23;Eau;Water
