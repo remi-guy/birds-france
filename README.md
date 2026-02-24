@@ -8,7 +8,8 @@ Ce projet vise à :
 - Associer chaque observation à une classe d’occupation du sol (OSO 2024)
 - Produire un dataset enrichi pour analyse d’habitat
 
-Cas d’étude actuel : **Tétras lyre (*Lyrurus tetrix*)**
+Cas d’étude actuel : **Tétras lyre (*Lyrurus tetrix*)** 
+Autre proposition : la famille des Phasianidae
 
 ---
 
@@ -17,32 +18,42 @@ Cas d’étude actuel : **Tétras lyre (*Lyrurus tetrix*)**
 
 ```text
 .
+├── README.md
 ├── data
-│ ├── raw
-│ │ ├── oiseaux-france.csv
-│ │ ├── oiseaux-france.parquet
-│ │ ├── oso_2024_mapping.csv
-│ │ ├── TAXREFv18.txt
-│ │ └── TAXVERN18.txt
-│ │
-│ ├── raster
-│ │ └── OCS_2024.tif
-│ │
-│ └── processed
-│ ├── taxref_species_vern.csv
-│ └── tetras_oso.csv
-│
+│   ├── processed
+│   │   ├── phasianidae_oso.csv
+│   │   ├── taxref_species_vernacular_mapping.csv
+│   │   └── tetras_oso.csv
+│   ├── raster
+│   │   └── OCS_2024.tif
+│   ├── raw
+│   │   ├── IUCN_red_list.csv
+│   │   ├── TAXREFv18.txt
+│   │   ├── TAXVERNv18.txt
+│   │   ├── ep_site.csv
+│   │   ├── liste_designations.csv
+│   │   ├── oiseaux-france.csv
+│   │   ├── oiseaux-france.parquet
+│   │   └── oso_2024_mapping.csv
+│   └── shp
+│       ├── departements-20170102.dbf
+│       ├── departements-20170102.prj
+│       ├── departements-20170102.shp
+│       ├── departements-20170102.shx
+│       ├── sig_metrop.cpg
+│       ├── sig_metrop.dbf
+│       ├── sig_metrop.prj
+│       ├── sig_metrop.shp
+│       └── sig_metrop.shx
 ├── notebook
-│ └── explo.ipynb
-│
-├── src
-│ ├── build_gdf.py
-│ ├── build_vernacular.py
-│ └── df_to_parquet.py
-│
-├── .gitignore
+│   └── explo.ipynb
 ├── requirements.txt
-└── README.md
+└── src
+    ├── build_gdf.py
+    ├── build_vernacular_mapping.py
+    └── df_to_parquet.py
+
+8 directories, 28 files
 ```
 
 ---
