@@ -14,6 +14,8 @@ Cas d’étude actuel : **Tétras lyre (*Lyrurus tetrix*)**
 
 ## 📂 Structure du projet
 
+
+```text
 .
 ├── data
 │ ├── raw
@@ -41,7 +43,7 @@ Cas d’étude actuel : **Tétras lyre (*Lyrurus tetrix*)**
 ├── .gitignore
 ├── requirements.txt
 └── README.md
-
+```
 
 ---
 

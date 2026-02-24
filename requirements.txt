@@ -1,0 +1,7 @@
+pandas
+numpy
+rasterio
+geopandas
+pyarrow
+fastparquet
+shapely

@@ -7,13 +7,13 @@ import numpy as np
 df = pd.read_parquet("./data/raw/oiseaux-france.parquet")
 
 # Option recommandé : commencer par une espèce
-df_tetras = df[df["species"] == "Lyrurus tetrix"]
+df_phasianidae = df[df["family"] == "Phasianidae"] 
 
 gdf = gpd.GeoDataFrame(
-    df_tetras,
+    df_phasianidae,
     geometry=gpd.points_from_xy(
-        df_tetras.decimalLongitude,
-        df_tetras.decimalLatitude
+        df_phasianidae.decimalLongitude,
+        df_phasianidae.decimalLatitude
     ),
     crs="EPSG:4326"
 )
@@ -50,4 +50,4 @@ gdf = gdf.merge(
     how="left"
 )
 
-gdf.to_csv("./data/processed/tetras_oso.csv", index=False)
+gdf.to_csv("./data/processed/phasianidae_oso.csv", index=False)

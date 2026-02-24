@@ -67,13 +67,19 @@ results/
 figures/
 
 # csv/parquet 
-
 data/raw/*.csv
 data/raw/*.parquet
 data/raw/*.txt
 data/raster/*.tif
 occurences.csv
 
+# shp
+data/shp/
+*.shp
+*.dbf
+*.shx
+*.cpg
+*.prj
 
 # =========================
 # KEEP OSO MAPPING FILE
@@ -82,4 +88,7 @@ occurences.csv
 !data/raw/oso_2024_mapping.csv
 !data/processed/taxref_species_vernacular_mapping.csv
 !data/processed/tetras_oso.csv
+!data/processed/phasianidae_oso.csv
+!data/shp/
+
 
