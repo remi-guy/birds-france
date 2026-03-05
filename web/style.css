@@ -1,0 +1,88 @@
+body {
+  margin: 0;
+  font-family: system-ui, Arial, sans-serif;
+}
+
+#map {
+  height: 80vh;
+}
+
+.panel {
+  padding: 12px 14px;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-weight: 600;
+}
+
+.muted {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+input[type="range"] {
+  width: min(720px, 92vw);
+}
+
+.legend {
+  background: white;
+  padding: 10px 12px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.legend-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.legend-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 4px 0;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+  background: #2f6fed;
+}
+
+/* Make the basemap less noisy */
+.leaflet-tile-pane {
+  filter: grayscale(1) brightness(1.08) contrast(0.95);
+}
+
+
+
+/* Optional: a bit nicer panel */
+.panel {
+  background: white;
+}
+
+.title-bar {
+  padding: 14px 20px;
+  border-bottom: 1px solid #eee;
+  background: white;
+}
+
+.title-bar h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.title-bar p {
+  margin: 3px 0 0 0;
+  color: #666;
+  font-size: 13px;
+}

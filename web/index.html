@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Observations d’oiseaux – France (slider temporel)</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"
+/>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+  <header class="title-bar">
+  <h1>
+    Observations cumulatives de Phasianidae en France — jusqu’en
+    <span id="titleYear">—</span>
+  </h1>
+  <p>Exploration spatiale des observations d’oiseaux en France métropolitaine</p>
+</header>
+  <div id="map"></div>
+
+  <div class="panel">
+    <div class="panel-left">
+      <div><b>Année :</b> <span id="yearValue">—</span></div>
+      <div class="muted" id="countValue">Points: —</div>
+    </div>
+
+    <input id="yearSlider" type="range" min="2000" max="2025" step="1" value="2015" />
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
