@@ -42,6 +42,9 @@ const modeSelect = document.getElementById("modeSelect");
 const speciesSearch = document.getElementById("speciesSearch");
 const sortSelect = document.getElementById("sortSelect");
 
+const playBtn = document.getElementById("playBtn");
+const speedSelect = document.getElementById("speedSelect");
+
 // ==========================
 // LAYERS / STATE
 // ==========================
@@ -56,6 +59,9 @@ let outlineLayer = null;
 let bySpecies = new Map();
 let allSpecies = [];
 let speciesCounts = new Map(); // species -> count
+
+let isPlaying = false;
+let playTimer = null;
 
 // ==========================
 // HELPERS
@@ -290,7 +296,7 @@ async function main() {
   refreshSpeciesSelect();
 
   // Events
-  slider.addEventListener("input", refresh);
+  
   speciesSelect.addEventListener("change", refresh);
   modeSelect.addEventListener("change", refresh);
 
@@ -308,6 +314,18 @@ async function main() {
     });
   }
 
+  playBtn.addEventListener("click", togglePlay);
+
+speedSelect.addEventListener("change", () => {
+  // If currently playing, restart interval with new speed
+  if (isPlaying) setPlayState(true);
+});
+
+
+slider.addEventListener("input", () => {
+  if (isPlaying) setPlayState(false);
+  refresh();
+});
   refresh();
 }
 
@@ -315,3 +333,34 @@ main().catch((err) => {
   console.error(err);
   alert(err.message);
 });
+
+function stepYearForward() {
+  const current = Number(slider.value);
+  const maxY = Number(slider.max);
+  const minY = Number(slider.min);
+
+  const next = current >= maxY ? minY : current + 1;
+  slider.value = String(next);
+  refresh();
+}
+
+function setPlayState(playing) {
+  isPlaying = playing;
+
+  if (playTimer) {
+    clearInterval(playTimer);
+    playTimer = null;
+  }
+
+  if (isPlaying) {
+    playBtn.textContent = "⏸ Pause";
+    const delay = Number(speedSelect.value) || 700;
+    playTimer = setInterval(stepYearForward, delay);
+  } else {
+    playBtn.textContent = "▶ Play";
+  }
+}
+
+function togglePlay() {
+  setPlayState(!isPlaying);
+}
