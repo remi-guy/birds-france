@@ -86,3 +86,7 @@ input[type="range"] {
   color: #666;
   font-size: 13px;
 }
+
+#infoBox {
+  min-width: 180px;
+}

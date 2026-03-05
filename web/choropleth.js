@@ -22,6 +22,43 @@ function colorBlueToRed(t) {
 
 const map = L.map("map", { zoomControl: true });
 
+// ==========================
+// INFO BOX (hover)
+// ==========================
+const info = L.control({ position: "topright" });
+
+info.onAdd = function () {
+  const div = L.DomUtil.create("div", "legend"); // reuse legend style
+  div.id = "infoBox";
+  div.innerHTML = `
+    <div class="legend-title">Département</div>
+    <div class="muted">Survolez un département</div>
+  `;
+  return div;
+};
+
+info.addTo(map);
+L.DomEvent.disableClickPropagation(document.getElementById("infoBox"));
+L.DomEvent.disableScrollPropagation(document.getElementById("infoBox"));
+
+function updateInfoBox(depName, depCode, value) {
+  const el = document.getElementById("infoBox");
+  if (!el) return;
+
+  if (depName === null) {
+    el.innerHTML = `
+      <div class="legend-title">Département</div>
+      <div class="muted">Survolez un département</div>
+    `;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="legend-title">${depName} <span class="muted">(${depCode ?? "—"})</span></div>
+    <div><b>Observations :</b> ${Number(value || 0).toLocaleString()}</div>
+  `;
+}
+
 // Basemap (keep consistent with your other pages)
 L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
   maxZoom: 19,
@@ -259,6 +296,21 @@ function renderYear(year) {
         `<b>${depName}</b> (${depCode ?? "—"})<br/>Observations: ${v.toLocaleString()}`,
         { sticky: true }
       );
+      // Hover highlight
+layer.on("mouseover", () => {
+  layer.setStyle({ weight: 2.2, opacity: 1.0 });
+  layer.bringToFront();
+
+  const depCode = getDepCodeFromPolygon(feature);
+  const depName = getDepNameFromPolygon(feature);
+  const v = depCode ? (counts.get(depCode) || 0) : 0;
+  updateInfoBox(depName, depCode, v);
+});
+
+layer.on("mouseout", () => {
+  layer.setStyle({ weight: 0.6, opacity: 0.6 });
+  updateInfoBox(null, null, null);
+});
       layer.on("mouseover", () => layer.setStyle({ weight: 2, opacity: 1.0 }));
 layer.on("mouseout", () => layer.setStyle({ weight: 0.6, opacity: 0.6 }));
     },
