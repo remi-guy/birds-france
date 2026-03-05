@@ -90,3 +90,83 @@ input[type="range"] {
 #infoBox {
   min-width: 180px;
 }
+
+select {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: white;
+}
+
+/* ==========================
+   Dashboard
+   ========================== */
+
+.dash {
+  padding: 18px 20px 28px 20px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .dash {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 14px;
+  padding: 14px 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  transition: transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.10);
+  border-color: #e2e2e2;
+}
+
+.card-title {
+  font-weight: 750;
+  margin-bottom: 6px;
+}
+
+.card-desc {
+  color: #444;
+  line-height: 1.35;
+  margin-bottom: 10px;
+}
+
+.card-meta {
+  font-size: 12px;
+  color: #666;
+}
+
+.dash-footer {
+  padding: 0 20px 18px 20px;
+}
+
+input[type="text"] {
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: white;
+}
+
+button {
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+}
+button:hover {
+  border-color: #cfcfcf;
+}
