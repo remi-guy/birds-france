@@ -91,8 +91,8 @@ choroplethLegend.onAdd = function () {
     <div class="legend-row"><b>Couleur</b> = nb d’observations</div>
     <div id="legendScale" style="margin-top:8px;"></div>
     <div class="muted" style="margin-top:6px;">
-      Échelle log pour éviter que 2–3 départements dominent.
-    </div>
+  Couleurs sur échelle log (meilleure lisibilité quand la distribution est très inégale).
+</div>
   `;
   return div;
 };
@@ -103,29 +103,36 @@ function renderLegendScale(vmax) {
   const el = document.getElementById("legendScale");
   if (!el) return;
 
-  // 5 bins on a log scale
-  const bins = 5;
-  const values = [];
-  for (let i = 0; i < bins; i++) {
-    const t = i / (bins - 1);              // 0..1
-    const v = Math.round(Math.expm1(t * Math.log1p(vmax))); // inverse of log scaling
-    values.push(v);
-  }
+  const vmin = 0;
 
-  const rows = values
-    .map((v, i) => {
-      const t = valueToT(v, vmax); // re-use your scaling
-      const c = colorBlueToRed(t);
-      return `
-        <div class="legend-row">
-          <span style="width:14px;height:14px;border-radius:3px;background:${c};display:inline-block;"></span>
-          <span>${v.toLocaleString()}</span>
-        </div>
-      `;
-    })
-    .join("");
+  // Pick 4 tick labels on a log scale (0, ~33%, ~66%, 100% of vmax)
+  const ticksT = [0, 0.33, 0.66, 1.0];
+  const tickValues = ticksT.map(t =>
+    t === 0 ? 0 : Math.round(Math.expm1(t * Math.log1p(vmax)))
+  );
 
-  el.innerHTML = rows;
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="
+        flex:1;
+        height:12px;
+        border-radius:8px;
+        background: linear-gradient(90deg,
+          ${colorBlueToRed(0.0)},
+          ${colorBlueToRed(0.5)},
+          ${colorBlueToRed(1.0)}
+        );
+        border: 1px solid rgba(0,0,0,0.08);
+      "></div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:#444;">
+      <span>${vmin.toLocaleString()}</span>
+      <span>${tickValues[1].toLocaleString()}</span>
+      <span>${tickValues[2].toLocaleString()}</span>
+      <span>${tickValues[3].toLocaleString()}</span>
+    </div>
+  `;
 }
 
 // --- Helpers ---
