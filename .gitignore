@@ -72,6 +72,8 @@ data/raw/*.parquet
 data/raw/*.txt
 data/raster/*.tif
 occurences.csv
+data/processed/*.csv
+data/processed/*.parquet
 
 # shp
 data/shp/
@@ -80,6 +82,7 @@ data/shp/
 *.shx
 *.cpg
 *.prj
+*.qmd
 
 # =========================
 # KEEP OSO MAPPING FILE
