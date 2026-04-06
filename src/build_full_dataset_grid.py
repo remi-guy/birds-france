@@ -1,51 +1,54 @@
-# src/build_full_dataset.py
-from __future__ import annotations
-
-import os
 from pathlib import Path
+import os
 
 import pandas as pd
 import geopandas as gpd
 from shapely import wkt
 
 
-def _ensure_paths_exist(*paths: Path) -> None:
-    missing = [str(p) for p in paths if not p.exists()]
-    if missing:
-        raise FileNotFoundError("Missing required files:\n- " + "\n- ".join(missing))
-
-
-def _load_points_csv_with_wkt(csv_path: Path, crs: str = "EPSG:4326") -> gpd.GeoDataFrame:
+# =========================
+# 1. Load points
+# =========================
+def _load_points(csv_path: Path) -> gpd.GeoDataFrame:
+    print(f"[1/5] Loading points from: {csv_path}")
     df = pd.read_csv(csv_path)
-    if "geometry" not in df.columns:
-        raise ValueError(
-            f"'geometry' column not found in {csv_path}. "
-            "Expected WKT geometry exported from a GeoDataFrame."
+
+    print("Point columns:", list(df.columns))
+
+    # Case 1: geometry already stored as WKT
+    if "geometry" in df.columns:
+        df["geometry"] = df["geometry"].apply(wkt.loads)
+        gdf = gpd.GeoDataFrame(df, geometry="geometry", crs="EPSG:4326")
+        return gdf
+
+    # Case 2: GBIF-style coordinates
+    if {"decimalLongitude", "decimalLatitude"}.issubset(df.columns):
+        gdf = gpd.GeoDataFrame(
+            df,
+            geometry=gpd.points_from_xy(df["decimalLongitude"], df["decimalLatitude"]),
+            crs="EPSG:4326",
         )
-    df["geometry"] = df["geometry"].apply(wkt.loads)
-    return gpd.GeoDataFrame(df, geometry="geometry", crs=crs)
+        return gdf
 
+    # Case 3: generic lon/lat
+    if {"longitude", "latitude"}.issubset(df.columns):
+        gdf = gpd.GeoDataFrame(
+            df,
+            geometry=gpd.points_from_xy(df["longitude"], df["latitude"]),
+            crs="EPSG:4326",
+        )
+        return gdf
 
-def _add_departments(gdf: gpd.GeoDataFrame, departments_shp: Path) -> gpd.GeoDataFrame:
-    departments = gpd.read_file(departments_shp)
-    if departments.crs != gdf.crs:
-        departments = departments.to_crs(gdf.crs)
-
-    keep_cols = [c for c in ["nom", "code_insee", "geometry"] if c in departments.columns]
-
-    gdf_dep = gpd.sjoin(
-        gdf,
-        departments[keep_cols],
-        how="left",
-        predicate="within",
+    raise ValueError(
+        "Could not build point geometries. Expected either "
+        "'geometry' (WKT), or ('decimalLongitude', 'decimalLatitude'), "
+        "or ('longitude', 'latitude')."
     )
 
-    if "index_right" in gdf_dep.columns:
-        gdf_dep = gdf_dep.drop(columns=["index_right"])
 
-    return gdf_dep
-
-
+# =========================
+# 2. Add protected areas
+# =========================
 def _load_protected_areas(sig_shp: Path, ep_site_csv: Path, designations_csv: Path) -> gpd.GeoDataFrame:
     os.environ["SHAPE_RESTORE_SHX"] = "YES"
 
@@ -68,6 +71,8 @@ def _add_protected_area_tags(
     gdf: gpd.GeoDataFrame,
     ep: gpd.GeoDataFrame,
 ) -> gpd.GeoDataFrame:
+    print("[2/5] Adding protected-area tags...")
+
     if ep.crs != gdf.crs:
         ep = ep.to_crs(gdf.crs)
 
@@ -113,25 +118,45 @@ def _add_protected_area_tags(
     return gdf
 
 
+# =========================
+# 3. Add French names
+# =========================
 def _add_vernacular_names(gdf: gpd.GeoDataFrame, mapping_csv: Path) -> gpd.GeoDataFrame:
+    print("[3/5] Adding French vernacular names...")
+
     mapping = pd.read_csv(mapping_csv)
     if "species" not in mapping.columns:
         raise ValueError("Expected 'species' column in vernacular mapping CSV.")
+
     return gdf.merge(mapping, on="species", how="left")
 
 
-def _add_grid_10km(gdf: gpd.GeoDataFrame, grid_shp: Path) -> gpd.GeoDataFrame:
-    grid = gpd.read_file(grid_shp)
+# =========================
+# 4. Add 10km grid using the web geojson with cd_sig
+# =========================
+def _add_grid_10km(gdf: gpd.GeoDataFrame, grid_geojson: Path) -> gpd.GeoDataFrame:
+    print("[4/5] Adding 10 km grid (METROP only)...")
 
-    required = {"cd_sig", "territoire", "geometry"}
-    missing = required - set(grid.columns)
-    if missing:
-        raise ValueError(f"Missing columns in grid shapefile: {sorted(missing)}")
+    grid = gpd.read_file(grid_geojson)
 
-    grid = grid.loc[grid["territoire"] == "METROP", ["cd_sig", "geometry"]].copy()
+    print("Grid columns:", list(grid.columns))
+    print("Grid CRS:", grid.crs)
+    print(grid.head())
 
-    if grid.crs != gdf.crs:
+    if "geometry" not in grid.columns:
+        raise ValueError("No geometry column found in grid file.")
+
+    if "cd_sig" not in grid.columns:
+        raise ValueError("Expected 'cd_sig' column in grid GeoJSON.")
+
+    if grid.crs is None:
+        print("Grid CRS is missing. Assuming EPSG:4326.")
+        grid = grid.set_crs("EPSG:4326")
+
+    if gdf.crs != grid.crs:
         grid = grid.to_crs(gdf.crs)
+
+    grid = grid[["cd_sig", "geometry"]].copy()
 
     out = gpd.sjoin(
         gdf,
@@ -140,97 +165,105 @@ def _add_grid_10km(gdf: gpd.GeoDataFrame, grid_shp: Path) -> gpd.GeoDataFrame:
         predicate="intersects",
     )
 
-    out = out.rename(columns={"cd_sig": "grid_id"})
-
     if "index_right" in out.columns:
         out = out.drop(columns=["index_right"])
 
     return out
 
 
+# =========================
+# 5. Aggregate
+# =========================
 def _aggregate_by_species_grid_year(gdf: gpd.GeoDataFrame) -> pd.DataFrame:
+    print("[5/5] Aggregating data...")
+
     gdf = gdf.copy()
     gdf["year"] = pd.to_datetime(gdf["eventDate"], errors="coerce").dt.year.astype("Int64")
 
     summary = (
-        gdf.dropna(subset=["species", "grid_id", "year"])
-        .groupby(["species", "grid_id", "year"], as_index=False)
+        gdf.dropna(subset=["species", "cd_sig", "year"])
+        .groupby(["species", "cd_sig", "year"], as_index=False)
         .size()
         .rename(columns={"size": "n_obs"})
-        .sort_values(["species", "grid_id", "year"])
+        .sort_values(["species", "cd_sig", "year"])
     )
 
+    print("Aggregation done:", summary.shape)
     return summary
 
 
-def main() -> None:
-    root = Path(".").resolve()
+# =========================
+# Save outputs
+# =========================
+def _save_outputs(gdf: gpd.GeoDataFrame, summary: pd.DataFrame, out_dir: Path) -> None:
+    print("Saving outputs...")
 
-    input_csv = root / "data" / "processed" / "phasianidae_oso.csv"
-    vernacular_csv = root / "data" / "processed" / "taxref_species_vernacular_mapping.csv"
-
-    departments_shp = root / "data" / "shp" / "departements-20170102.shp"
-    sig_shp = root / "data" / "shp" / "sig_metrop.shp"
-    grid_10km_shp = root / "data" / "shp" / "mailles_10km.shp"
-
-    ep_site_csv = root / "data" / "raw" / "ep_site.csv"
-    designations_csv = root / "data" / "raw" / "liste_designations.csv"
-
-    out_dir = root / "data" / "processed"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    out_parquet = out_dir / "phasianidae_full_grid.parquet"
-    out_geojson = out_dir / "phasianidae_full_grid.geojson"
-    out_grid_year_csv = out_dir / "phasianidae_by_species_grid_year.csv"
-    out_grid_year_parquet = out_dir / "phasianidae_by_species_grid_year.parquet"
+    detailed_parquet = out_dir / "phasianidae_full_grid.parquet"
+    detailed_geojson = out_dir / "phasianidae_full_grid.geojson"
+    summary_csv = out_dir / "phasianidae_by_species_grid_year.csv"
+    summary_parquet = out_dir / "phasianidae_by_species_grid_year.parquet"
 
-    _ensure_paths_exist(
-        input_csv,
-        vernacular_csv,
-        departments_shp,
-        sig_shp,
-        grid_10km_shp,
-        ep_site_csv,
-        designations_csv,
-    )
+    print(f"Exporting detailed Parquet: {detailed_parquet}")
+    gdf.drop(columns=["geometry"]).to_parquet(detailed_parquet, index=False)
 
-    print(f"[1/7] Loading points from: {input_csv}")
-    gdf = _load_points_csv_with_wkt(input_csv, crs="EPSG:4326")
+    print(f"Exporting detailed GeoJSON: {detailed_geojson}")
+    gdf.to_file(detailed_geojson, driver="GeoJSON")
 
-    print("[2/7] Adding departments...")
-    gdf = _add_departments(gdf, departments_shp)
+    print(f"Exporting aggregated CSV: {summary_csv}")
+    summary.to_csv(summary_csv, index=False)
 
-    print("[3/7] Loading protected areas...")
-    ep = _load_protected_areas(sig_shp, ep_site_csv, designations_csv)
-
-    print("[4/7] Adding protected-area tags...")
-    gdf = _add_protected_area_tags(gdf, ep)
-
-    print("[5/7] Adding French vernacular names...")
-    gdf = _add_vernacular_names(gdf, vernacular_csv)
-
-    print("[6/7] Adding 10 km grid (METROP only)...")
-    gdf = _add_grid_10km(gdf, grid_10km_shp)
-
-    print("[7/7] Aggregating by species x grid x year...")
-    summary = _aggregate_by_species_grid_year(gdf)
-
-    print(f"Exporting detailed Parquet: {out_parquet}")
-    gdf.drop(columns=["geometry"]).to_parquet(out_parquet, index=False)
-
-    print(f"Exporting detailed GeoJSON: {out_geojson}")
-    gdf.to_file(out_geojson, driver="GeoJSON")
-
-    print(f"Exporting aggregated CSV: {out_grid_year_csv}")
-    summary.to_csv(out_grid_year_csv, index=False)
-
-    print(f"Exporting aggregated Parquet: {out_grid_year_parquet}")
-    summary.to_parquet(out_grid_year_parquet, index=False)
+    print(f"Exporting aggregated Parquet: {summary_parquet}")
+    summary.to_parquet(summary_parquet, index=False)
 
     print("Done.")
     print(f"Detailed rows: {len(gdf):,}")
     print(f"Aggregated rows: {len(summary):,}")
     print(summary.head())
+
+
+# =========================
+# MAIN
+# =========================
+def main() -> None:
+    root = Path(__file__).resolve().parents[1]
+
+    input_csv = root / "data" / "processed" / "phasianidae_oso.csv"
+    vernacular_csv = root / "data" / "processed" / "taxref_species_vernacular_mapping.csv"
+
+    sig_shp = root / "data" / "shp" / "sig_metrop.shp"
+    ep_site_csv = root / "data" / "raw" / "ep_site.csv"
+    designations_csv = root / "data" / "raw" / "liste_designations.csv"
+
+    grid_geojson = root / "web" / "maille_10km_metrop.geojson"
+
+    out_dir = root / "data" / "processed"
+
+    required_paths = [
+        input_csv,
+        vernacular_csv,
+        sig_shp,
+        ep_site_csv,
+        designations_csv,
+        grid_geojson,
+    ]
+
+    missing = [str(p) for p in required_paths if not p.exists()]
+    if missing:
+        raise FileNotFoundError("Missing required files:\n- " + "\n- ".join(missing))
+
+    gdf = _load_points(input_csv)
+
+    print("[2/5] Loading protected areas...")
+    ep = _load_protected_areas(sig_shp, ep_site_csv, designations_csv)
+    gdf = _add_protected_area_tags(gdf, ep)
+
+    gdf = _add_vernacular_names(gdf, vernacular_csv)
+    gdf = _add_grid_10km(gdf, grid_geojson)
+
+    summary = _aggregate_by_species_grid_year(gdf)
+    _save_outputs(gdf, summary, out_dir)
 
 
 if __name__ == "__main__":

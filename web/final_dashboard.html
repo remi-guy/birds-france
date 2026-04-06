@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Birds France – Final Dashboard</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <link rel="stylesheet" href="./style.css" />
+
+  <style>
+    .story-wrap {
+      padding: 16px 20px 0 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .story-card {
+      background: white;
+      border: 1px solid #eee;
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    }
+
+    .story-card h2 {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+    }
+
+    .story-card p {
+      margin: 0;
+      color: #444;
+      line-height: 1.45;
+    }
+
+    #map {
+      height: 68vh;
+    }
+
+    .panel {
+      padding: 12px 20px;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: white;
+    }
+
+    .panel-group {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .panel-grow {
+      flex: 1 1 320px;
+      min-width: 260px;
+    }
+
+    .bottom-grid {
+      padding: 16px 20px 24px 20px;
+      display: grid;
+      grid-template-columns: 1.3fr 0.7fr;
+      gap: 14px;
+    }
+
+    .chart-card,
+    .insight-card {
+      background: white;
+      border: 1px solid #eee;
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    }
+
+    .chart-card h2,
+    .insight-card h2 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 320px;
+    }
+
+    .insight-list {
+      margin: 0;
+      padding-left: 18px;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .insight-list li + li {
+      margin-top: 8px;
+    }
+
+    .small-note {
+      margin-top: 12px;
+      color: #666;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 980px) {
+      .bottom-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #map {
+        height: 58vh;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="title-bar">
+    <h1>Birds France — External Events and Bird Observations</h1>
+    <p>
+      Interactive dashboard for Phasianidae observations in metropolitan France
+    </p>
+  </header>
+
+  <section class="story-wrap">
+    <div class="story-card">
+      <h2>Question</h2>
+      <p>
+        Can changes in bird observations be linked to external events such as the
+        spread of smartphones, the rise of participatory platforms, or broader
+        environmental dynamics?
+      </p>
+    </div>
+  </section>
+
+  <div id="map"></div>
+
+  <div class="panel">
+    <div class="panel-group">
+      <strong>Year:</strong>
+      <span id="yearValue">—</span>
+      <span class="muted" id="countValue">Total observations: —</span>
+    </div>
+
+    <div class="panel-group">
+      <label for="speciesSearch" class="muted">Species search</label>
+      <input id="speciesSearch" type="text" placeholder="Search species..." />
+      <select id="speciesSelect"></select>
+    </div>
+
+    <div class="panel-group">
+      <label for="sortSelect" class="muted">Sort</label>
+      <select id="sortSelect">
+        <option value="count">Most frequent</option>
+        <option value="alpha">A → Z</option>
+      </select>
+    </div>
+
+    <div class="panel-group">
+      <label for="modeSelect" class="muted">Mode</label>
+      <select id="modeSelect">
+        <option value="year">Single year</option>
+        <option value="cumulative">Cumulative (≤ year)</option>
+      </select>
+    </div>
+
+    <div class="panel-group">
+      <button id="playBtn" type="button">Play</button>
+      <label for="speedSelect" class="muted">Speed</label>
+      <select id="speedSelect">
+        <option value="1200">Slow</option>
+        <option value="700" selected>Normal</option>
+        <option value="300">Fast</option>
+      </select>
+    </div>
+
+    <div class="panel-grow">
+      <input
+        id="yearSlider"
+        type="range"
+        min="2000"
+        max="2025"
+        step="1"
+        value="2015"
+      />
+    </div>
+  </div>
+
+  <section class="bottom-grid">
+    <div class="chart-card">
+      <h2>Temporal evolution of observations</h2>
+      <div class="chart-wrap">
+        <canvas id="timeChart"></canvas>
+      </div>
+    </div>
+
+    <div class="insight-card">
+      <h2>Current insight</h2>
+      <ul id="insightList" class="insight-list">
+        <li>Loading insights...</li>
+      </ul>
+      <div class="small-note">
+        The vertical lines in the chart mark external milestones used to interpret
+        changes in observation patterns.
+      </div>
+    </div>
+  </section>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="./final_dashboard.js"></script>
+</body>
+</html>
