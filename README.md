@@ -1,3 +1,70 @@
+
+## Installation et lancement
+
+### 1. Cloner le projet
+
+```bash
+git clone https://github.com/remi-guy/birds-france.git
+cd birds-france
+```
+
+### 2. Créer un environnement virtuel
+
+```bash
+python -m venv venv
+```
+
+Activation :
+
+- **Windows :** `venv\Scripts\activate`
+- **Mac / Linux :** `source venv/bin/activate`
+
+### 3. Installer les dépendances
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Construire le dataset enrichi
+
+Lancer le script principal :
+
+```bash
+python src/build_full_dataset_grid.py
+```
+
+Ce script va :
+
+- charger les observations
+- enrichir les données (aires protégées, noms, etc.)
+- associer les observations aux mailles 10 km
+- générer les fichiers utilisés par le dashboard
+
+Fichiers générés dans `data/processed/` :
+
+- `phasianidae_full_grid.geojson`
+- `phasianidae_by_species_grid_year.csv`
+
+### 5. Lancer le dashboard
+
+Se placer dans le dossier `web` puis lancer un serveur local :
+
+**Option 1 (Python)**
+
+```bash
+cd web
+python -m http.server 8000
+```
+
+Puis ouvrir dans le navigateur :
+
+```
+http://localhost:8000/final_dashboard.html
+```
+```
+
+
+
 # Analyse des données d'observation d'oiseaux en France
 
 ## Objectif
