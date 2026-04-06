@@ -4,17 +4,88 @@
 
 Ce projet vise à :
 
-- Structurer et nettoyer des données d’occurrences d’oiseaux en France
-- Associer chaque observation à une classe d’occupation du sol (OSO 2024)
-- Produire un dataset enrichi pour analyse d’habitat
+- Structurer et nettoyer des données d’occurrences d’oiseaux en France  
+- Associer chaque observation à une classe d’occupation du sol (OSO 2024)  
+- Produire un dataset enrichi pour analyse d’habitat  
+- Explorer l’évolution spatio-temporelle des observations  
+- Mettre en évidence l’impact potentiel d’événements externes sur ces observations  
 
-Cas d’étude actuel : **Tétras lyre (*Lyrurus tetrix*)** 
-Autre proposition : la famille des Phasianidae
+Cas d’étude actuel : **Tétras lyre (*Lyrurus tetrix*)**  
+Autre proposition : la famille des **Phasianidae**
+
+---
+
+## 🎯 Problématique
+
+**Quel est l’impact des événements externes (politiques publiques, développement des technologies comme les smartphones, essor des sciences participatives) sur l’évolution des observations d’oiseaux en France ?**
+
+L’objectif est d’identifier si certaines ruptures dans les données peuvent être associées à :
+- des changements réglementaires,
+- des programmes environnementaux,
+- ou des évolutions technologiques facilitant l’observation.
+
+---
+
+## 🧠 Approche
+
+Le projet s’appuie sur une logique en quatre étapes :
+
+1. **Constat**  
+   Les observations d’oiseaux évoluent fortement dans le temps.
+
+2. **Identification de ruptures**  
+   Recherche de périodes de forte augmentation ou de changement.
+
+3. **Mise en relation avec des événements externes**  
+   Comparaison avec :
+   - l’essor des smartphones,
+   - le développement des plateformes participatives,
+   - certaines politiques environnementales.
+
+4. **Interprétation**  
+   Analyse du rôle potentiel de ces facteurs dans les tendances observées.
+
+---
+
+## 🗺️ Visualisation
+
+### Carte interactive (principale)
+
+- Carte de la France avec maillage spatial (10 km × 10 km)  
+- Densité d’observations par zone  
+- Slider temporel  
+- Sélection d’espèces  
+
+**Objectif :**
+- Observer l’évolution spatiale des observations  
+- Identifier si les changements sont homogènes ou localisés  
+
+---
+
+### Évolution temporelle
+
+- Graphique du nombre d’observations par année  
+- Filtrage par espèce  
+
+**Objectif :**
+- Détecter des ruptures ou accélérations  
+- Comparer les dynamiques entre espèces  
+
+---
+
+### Enrichissement analytique
+
+Ajout d’événements externes sous forme de repères temporels :
+
+- diffusion des smartphones  
+- essor des sciences participatives  
+- politiques environnementales  
+
+Ces éléments permettent d’interpréter les changements observés.
 
 ---
 
 ## 📂 Structure du projet
-
 
 ```text
 .
@@ -36,15 +107,8 @@ Autre proposition : la famille des Phasianidae
 │   │   ├── oiseaux-france.parquet
 │   │   └── oso_2024_mapping.csv
 │   └── shp
-│       ├── departements-20170102.dbf
-│       ├── departements-20170102.prj
-│       ├── departements-20170102.shp
-│       ├── departements-20170102.shx
-│       ├── sig_metrop.cpg
-│       ├── sig_metrop.dbf
-│       ├── sig_metrop.prj
-│       ├── sig_metrop.shp
-│       └── sig_metrop.shx
+│       ├── departements-20170102.*
+│       ├── sig_metrop.*
 ├── notebook
 │   └── explo.ipynb
 ├── requirements.txt
@@ -52,75 +116,3 @@ Autre proposition : la famille des Phasianidae
     ├── build_gdf.py
     ├── build_vernacular_mapping.py
     └── df_to_parquet.py
-
-8 directories, 28 files
-```
-
----
-
-## ⚙️ Installation
-
-### 1️⃣ Cloner le dépôt
-
-```bash
-git clone <repo_url>
-cd <repo_name>
-```
-
-### 2️⃣ Créer un environnement virtuel
-
-python -m venv .venv
-source .venv/bin/activate      # macOS / Linux
-
-### 3️⃣ Installer les dépendances
-
-pip install -r requirements.txt
-
----
-
-## 📊 Données
-
-### 🐦 Occurrences d’oiseaux
-
-Format : CSV / Parquet
-Champs principaux :
-
-species
-
-decimalLatitude
-
-decimalLongitude
-
-### Occupation du sol
-
-Raster : OCS_2024.tif
-Résolution : ~10 m
-Nomenclature : 23 classes (voir oso_2024_mapping.csv)
-
----
-
-## 🚀 Pipeline
-
-### 1️⃣ Conversion en Parquet
-
-Script : src/df_to_parquet.py
-Objectif : optimiser la lecture des données volumineuses.
-
-### 2️⃣ Construction du GeoDataFrame
-
-Script : src/build_gdf.py
-
-Filtrage par espèce
-
-Création des points (EPSG:4326)
-
-Reprojection vers le CRS du raster
-
-Extraction de la valeur OSO
-
-Export du CSV final
-
-### 3️⃣ Enrichissement des classes
-
-Extraction du nom vernaculaire pour chaque espèce 
-Jointure avec oso_2024_mapping.csv pour obtenir la signification des codes.
