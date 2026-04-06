@@ -179,3 +179,36 @@ button {
   cursor: pointer;
 }
 button:hover { border-color: #cfcfcf; }
+
+.chart-wrap {
+  position: relative;
+  height: 320px;
+}
+
+.chart-wrap-large {
+  height: 420px;
+}
+
+.chart-card h2,
+.insight-card h2 {
+  margin: 0 0 14px 0;
+  font-size: 24px;
+}
+
+.insight-card {
+  font-size: 16px;
+}
+
+.insight-list {
+  margin: 0;
+  padding-left: 22px;
+  color: #333;
+  line-height: 1.65;
+}
+
+.small-note {
+  margin-top: 14px;
+  color: #666;
+  font-size: 14px;
+  line-height: 1.45;
+}

@@ -99,3 +99,7 @@ data/shp/
 
 Data storytelling _ Fichiers lourds/TAXREFv18.txt
 Data storytelling _ Fichiers lourds/TAXVERNv18.txt
+
+data/Data storytelling _ Fichiers lourds/TAXREFv18.txt
+data/processed/phasianidae_full_grid.geojson
+data/processed/phasianidae_full_enriched.geojson
