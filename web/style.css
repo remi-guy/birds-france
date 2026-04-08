@@ -58,10 +58,10 @@ input[type="range"] {
   background: #2f6fed;
 }
 
-/* Make the basemap less noisy */
+/* Make the basemap less noisy
 .leaflet-tile-pane {
-  filter: grayscale(1) brightness(1.08) contrast(0.95);
-}
+  filter: grayscale(1) brightness(1.08) contrast(0.95); */
+/* } */
 
 
 

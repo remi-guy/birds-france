@@ -1,7 +1,7 @@
 // ==========================
 // CONFIGURATION
 // ==========================
-const URL_OBSERVATIONS = "../data/processed/phasianidae_full_grid.geojson";
+const URL_OBSERVATIONS = "../data/processed/phasianidae_filtered.geojson";
 const URL_GRILLE = "./maille_10km_metrop.geojson";
 const URL_FRANCE = "./france_metropole.geojson";
 
@@ -16,6 +16,22 @@ const CHAMPS_ESPECE = [
   "species",
   "scientificName",
   "taxon_name",
+];
+
+const MAPPING_ESPECES = {
+  "Lyrurus tetrix": "Tétras lyre",
+  "Tetrao urogallus": "Grand tétras",
+  "Lagopus muta": "Lagopède alpin",
+  "Tetrastes bonasia": "Gélinotte des bois",
+  "Alectoris graeca": "Perdrix bartavelle",
+};
+
+const ESPECES_UI = [
+  {value: "Tétras lyre (Lyrurus tetrix)", image: "./images/tetras_lyre.jpg",},
+  {value: "Grand tétras (Tetrao urogallus)", image: "./images/grand_tetras.jpg",},
+  {value: "Lagopède alpin (Lagopus muta)", image: "./images/lagopede.jpg",},
+  {value: "Gélinotte des bois (Tetrastes bonasia)", image: "./images/gelinotte.jpg",},
+  {value: "Perdrix bartavelle (Alectoris graeca)", image: "./images/perdrix.jpeg",},
 ];
 
 const EVENEMENTS_EXTERNES = [
@@ -74,10 +90,35 @@ const EVENEMENTS_EXTERNES = [
 // ==========================
 const carte = L.map("map", { zoomControl: true });
 
-L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-  maxZoom: 19,
-  attribution: "&copy; OpenStreetMap &copy; CARTO",
-}).addTo(carte);
+const fondClair = L.tileLayer(
+  "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+  {
+    maxZoom: 19,
+    attribution: "&copy; OpenStreetMap &copy; CARTO",
+  }
+);
+
+const fondSatellite = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {
+    maxZoom: 19,
+    attribution: "Tiles &copy; Esri",
+    opacity: 0.2,
+  }
+);
+
+// fond par défaut
+fondSatellite.addTo(carte);
+
+// sélecteur de fond
+L.control.layers(
+  {
+    "Clair": fondClair,
+    "Satellite": fondSatellite,
+  },
+  null,
+  { position: "topleft", collapsed: false }
+).addTo(carte);
 
 // ==========================
 // ÉLÉMENTS UI
@@ -96,6 +137,7 @@ const selectVitesse = document.getElementById("speedSelect");
 
 const listeInsights = document.getElementById("insightList");
 const canvasGraphique = document.getElementById("timeChart");
+const galerieEspeces = document.getElementById("speciesGallery");
 
 // ==========================
 // ÉTAT GLOBAL
@@ -255,8 +297,21 @@ function premiereProprieteExistante(props, champs) {
 }
 
 function extraireLibelleEspece(feature) {
-  const brut = premiereProprieteExistante(feature?.properties, CHAMPS_ESPECE);
-  return brut ? String(brut).trim() : "Espèce inconnue";
+  const props = feature?.properties || {};
+
+  const nomScientifique = props.species
+    ? String(props.species).trim()
+    : null;
+
+  const nomVernaculaire = nomScientifique && MAPPING_ESPECES[nomScientifique]
+    ? MAPPING_ESPECES[nomScientifique]
+    : (props.vernacularName_fr || "Espèce inconnue");
+
+  if (nomScientifique && nomVernaculaire !== nomScientifique) {
+    return `${nomVernaculaire} (${nomScientifique})`;
+  }
+
+  return nomVernaculaire;
 }
 
 function normaliserCodeGrille(valeur) {
@@ -400,7 +455,7 @@ async function ajouterMasqueFrance() {
   coucheMasque = L.polygon([mondeExterieur, ...trous], {
     stroke: false,
     fillColor: "#ffffff",
-    fillOpacity: 0.85,
+    fillOpacity: 0,
     interactive: false,
   }).addTo(carte);
 
@@ -823,6 +878,39 @@ function afficherInsights(annee, mode, especeSelectionnee) {
   `;
 }
 
+function construireGalerieEspeces() {
+  if (!galerieEspeces) return;
+
+  galerieEspeces.innerHTML = "";
+
+  ESPECES_UI.forEach((espece) => {
+    const carte = document.createElement("div");
+    carte.className = "species-thumb";
+    carte.dataset.value = espece.value;
+
+    carte.innerHTML = `
+      <img src="${espece.image}" alt="${espece.value}">
+      <div class="label">${espece.value}</div>
+    `;
+
+    carte.addEventListener("click", () => {
+      selectEspece.value = espece.value;
+      rafraichir();
+    });
+
+    galerieEspeces.appendChild(carte);
+  });
+}
+
+function mettreAJourGalerieActive() {
+  if (!galerieEspeces) return;
+
+  const valeurSelectionnee = selectEspece.value || "__ALL__";
+
+  galerieEspeces.querySelectorAll(".species-thumb").forEach((element) => {
+    element.classList.toggle("active", element.dataset.value === valeurSelectionnee);
+  });
+}
 // ==========================
 // RAFRAÎCHISSEMENT GLOBAL
 // ==========================
@@ -834,6 +922,7 @@ function rafraichir() {
   afficherCarte(annee, mode, especeSelectionnee);
   afficherGraphique(especeSelectionnee);
   afficherInsights(annee, mode, especeSelectionnee);
+  mettreAJourGalerieActive();
 }
 
 // ==========================
@@ -907,6 +996,7 @@ async function main() {
 
   construireIndexEspeces(featuresObservations);
   rafraichirSelectEspece();
+  construireGalerieEspeces();
 
   const anneeMin = Math.min(...listeAnnees);
   const anneeMax = Math.max(...listeAnnees);

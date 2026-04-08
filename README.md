@@ -27,13 +27,14 @@ pip install -r requirements.txt
 
 ### 4. Construire le dataset enrichi
 
-Lancer le script principal :
+Lancer les deux principaux scripts :
 
 ```bash
 python src/build_full_dataset_grid.py
+python src/filter_phasianidae.py
 ```
 
-Ce script va :
+Le premier script va :
 
 - charger les observations
 - enrichir les données (aires protégées, noms, etc.)
@@ -45,23 +46,24 @@ Fichiers générés dans `data/processed/` :
 - `phasianidae_full_grid.geojson`
 - `phasianidae_by_species_grid_year.csv`
 
-### 5. Lancer le dashboard
+Le second script permet de se concentrer sur les 5 espèces de tétraonidés présentent en montagne, ce qui allège la visualisation.
 
-Se placer dans le dossier `web` puis lancer un serveur local :
+Fichiers générés dans `data/processed` :
+- `phasianidae_filtered.geojson`
+
+
+### 5. Lancer le dashboard
 
 **Option 1 (Python)**
 
 ```bash
-cd web
-python -m http.server 8000
+python3 -m http.server 8000 & explorer.exe http://localhost:8000/web/final_dashboard.html
 ```
 
-Puis ouvrir dans le navigateur :
 
-```
-http://localhost:8000/final_dashboard.html
-```
+**Option 2 (GoLive)**
 
+Cliquer sur *GoLive* en bas à droite de l'écran
 
 
 
