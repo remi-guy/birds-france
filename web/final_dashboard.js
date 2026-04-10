@@ -44,37 +44,57 @@ const EVENEMENTS_EXTERNES = [
     description: "Grand épisode de chaleur en Europe, utile comme repère environnemental.",
   },
   {
-    annee: 2007,
-    label: "Essor smartphones",
+    annee: 2015,
+    label: "Smartphones",
     categorie: "technologique",
     couleur: "#2563eb",
     important: true,
     description: "Début de la diffusion massive des smartphones.",
   },
+  // {
+  //   annee: 2012,
+  //   label: "Boom des applis",
+  //   categorie: "technologique",
+  //   couleur: "#2563eb",
+  //   important: true,
+  //   description: "Les applications mobiles de signalement deviennent plus accessibles.",
+  // },
   {
-    annee: 2012,
-    label: "Boom des applis",
+    annee: 2010,
+    label: "Sciences participatives",
     categorie: "technologique",
     couleur: "#2563eb",
     important: true,
-    description: "Les applications mobiles de signalement deviennent plus accessibles.",
-  },
-  {
-    annee: 2015,
-    label: "Plateformes participatives",
-    categorie: "sociétal",
-    couleur: "#7c3aed",
-    important: true,
     description: "Les plateformes de sciences participatives deviennent plus visibles.",
   },
+
+  {
+    annee: 2016,
+    label: "Printemps pluvieux",
+    categorie: "écologique",
+    couleur: "#e67e22",
+    important: true,
+    description: "Année reconnue comme particulièrement défavorable à l'observation des oiseaux, avec un impact potentiel sur les données d'observations.",
+  },
+
   {
     annee: 2018,
-    label: "Boom participatif",
-    categorie: "sociétal",
-    couleur: "#7c3aed",
+    label: "Printemps ensoleillé",
+    categorie: "écologique",
+    couleur: "#e67e22",
     important: true,
-    description: "Les sciences participatives prennent une place plus importante.",
+    description: "Année reconnue comme particulièrement favorable à l'observation des oiseaux, avec un impact potentiel sur les données d'observations.",
   },
+
+  {
+    annee: 2005,
+    label: "BDD naturalistes",
+    categorie: "technologique",
+    couleur: "#2563eb",
+    important: true,
+    description: "Mise en place de bases de données naturalistes d'une structuration progressive des réseaux d’observateurs",
+  },  
+
   {
     annee: 2020,
     label: "COVID / confinements",
@@ -658,7 +678,7 @@ const pluginEvenements = {
 
       if (!event.important) return;
 
-      const yTexte = chartArea.top + 14 + (index % 2) * 22;
+      const yTexte = chartArea.top + 5 + (index % 2) * 22;
       const texte = event.label;
 
       ctx.fillStyle = event.couleur || "#444";
@@ -668,7 +688,7 @@ const pluginEvenements = {
 
       ctx.save();
       ctx.translate(x + 10, yTexte + 1);
-      ctx.rotate(-0.22);
+      ctx.rotate(-1.3);
       ctx.fillStyle = event.couleur || "#444";
       ctx.fillText(texte, 0, 0);
       ctx.restore();
@@ -720,6 +740,7 @@ function afficherGraphique(especeSelectionnee) {
       plugins: {
         legend: {
           display: true,
+          position: "bottom",
           labels: {
             boxWidth: 40,
             color: "#222",
