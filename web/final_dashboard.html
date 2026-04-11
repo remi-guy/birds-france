@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -22,6 +22,45 @@
       padding: 0;
       overflow-x: hidden;
       max-width: 100%;
+      font-family: Arial, sans-serif;
+      background: #fafafa;
+      color: #222;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: white;
+      border-bottom: 1px solid #ddd;
+      padding: 14px 24px;
+      display: flex;
+      gap: 20px;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #1d4ed8;
+      font-weight: 700;
+    }
+
+    nav a.active {
+      color: #111827;
+    }
+
+    .title-bar {
+      padding: 24px 20px 8px 20px;
+    }
+
+    .title-bar h1 {
+      margin: 0 0 8px 0;
+      font-size: 2rem;
+    }
+
+    .title-bar p {
+      margin: 0;
+      color: #444;
+      line-height: 1.45;
     }
 
     .story-wrap {
@@ -254,15 +293,19 @@
         min-width: 0;
       }
     }
-
   </style>
 </head>
 
 <body>
+  <nav>
+    <a href="final_dashboard.html" class="active">Carte interactive</a>
+    <a href="description.html">Niche écologique</a>
+  </nav>
+
   <header class="title-bar">
     <h1>Birds France — Événements externes et observations d’oiseaux</h1>
     <p>
-      Tableau de bord interactif sur les observations de Phasianidae en France métropolitaine
+      Tableau de bord interactif sur les observations de Galliformes de montagne en France métropolitaine
     </p>
   </header>
 

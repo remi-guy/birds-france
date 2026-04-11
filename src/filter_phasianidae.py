@@ -1,8 +1,10 @@
 import json
 from pathlib import Path
+import csv
 
 INPUT = Path("data/processed/phasianidae_full_grid.geojson")
 OUTPUT = Path("data/processed/phasianidae_filtered.geojson")
+CSV_OUTPUT = Path("data/processed/phasianidae_filtered.csv")
 
 ANNEE_MIN = 1980
 ANNEE_MAX = 2021
@@ -49,3 +51,21 @@ with OUTPUT.open("w", encoding="utf-8") as f:
     json.dump(geo_filtre, f, ensure_ascii=False)
 
 print(f"{len(features_filtrees)} observations gardées")
+
+
+# récupérer toutes les clés possibles (colonnes)
+all_keys = set()
+for f in features_filtrees:
+    all_keys.update(f.get("properties", {}).keys())
+
+all_keys = sorted(all_keys)
+
+# écriture CSV
+with CSV_OUTPUT.open("w", encoding="utf-8", newline="") as f:
+    writer = csv.DictWriter(f, fieldnames=all_keys)
+    writer.writeheader()
+
+    for feat in features_filtrees:
+        writer.writerow(feat.get("properties", {}))
+
+print(f"CSV écrit : {CSV_OUTPUT}")

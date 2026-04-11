@@ -4,6 +4,7 @@
 const URL_OBSERVATIONS = "../data/processed/phasianidae_filtered.geojson";
 const URL_GRILLE = "./maille_10km_metrop.geojson";
 const URL_FRANCE = "./france_metropole.geojson";
+const URL_EP = "../data/processed/sig_metrop.geojson";
 
 const CHAMP_ANNEE = "year";
 
@@ -27,11 +28,11 @@ const MAPPING_ESPECES = {
 };
 
 const ESPECES_UI = [
-  {value: "Tétras lyre (Lyrurus tetrix)", image: "./images/tetras_lyre.jpg",},
-  {value: "Grand tétras (Tetrao urogallus)", image: "./images/grand_tetras.jpg",},
-  {value: "Lagopède alpin (Lagopus muta)", image: "./images/lagopede.jpg",},
-  {value: "Gélinotte des bois (Tetrastes bonasia)", image: "./images/gelinotte.jpg",},
-  {value: "Perdrix bartavelle (Alectoris graeca)", image: "./images/perdrix.jpeg",},
+  { value: "Tétras lyre (Lyrurus tetrix)", image: "./images/tetras_lyre.jpg" },
+  { value: "Grand tétras (Tetrao urogallus)", image: "./images/grand_tetras.jpg" },
+  { value: "Lagopède alpin (Lagopus muta)", image: "./images/lagopede.jpg" },
+  { value: "Gélinotte des bois (Tetrastes bonasia)", image: "./images/gelinotte.jpg" },
+  { value: "Perdrix bartavelle (Alectoris graeca)", image: "./images/perdrix.jpeg" },
 ];
 
 const EVENEMENTS_EXTERNES = [
@@ -51,14 +52,6 @@ const EVENEMENTS_EXTERNES = [
     important: true,
     description: "Début de la diffusion massive des smartphones.",
   },
-  // {
-  //   annee: 2012,
-  //   label: "Boom des applis",
-  //   categorie: "technologique",
-  //   couleur: "#2563eb",
-  //   important: true,
-  //   description: "Les applications mobiles de signalement deviennent plus accessibles.",
-  // },
   {
     annee: 2010,
     label: "Sciences participatives",
@@ -67,7 +60,6 @@ const EVENEMENTS_EXTERNES = [
     important: true,
     description: "Les plateformes de sciences participatives deviennent plus visibles.",
   },
-
   {
     annee: 2016,
     label: "Printemps pluvieux",
@@ -76,7 +68,6 @@ const EVENEMENTS_EXTERNES = [
     important: true,
     description: "Année reconnue comme particulièrement défavorable à l'observation des oiseaux, avec un impact potentiel sur les données d'observations.",
   },
-
   {
     annee: 2018,
     label: "Printemps ensoleillé",
@@ -85,7 +76,6 @@ const EVENEMENTS_EXTERNES = [
     important: true,
     description: "Année reconnue comme particulièrement favorable à l'observation des oiseaux, avec un impact potentiel sur les données d'observations.",
   },
-
   {
     annee: 2005,
     label: "BDD naturalistes",
@@ -93,8 +83,7 @@ const EVENEMENTS_EXTERNES = [
     couleur: "#2563eb",
     important: true,
     description: "Mise en place de bases de données naturalistes d'une structuration progressive des réseaux d’observateurs",
-  },  
-
+  },
   {
     annee: 2020,
     label: "COVID / confinements",
@@ -130,15 +119,7 @@ const fondSatellite = L.tileLayer(
 // fond par défaut
 fondSatellite.addTo(carte);
 
-// sélecteur de fond
-L.control.layers(
-  {
-    "Clair": fondClair,
-    "Satellite": fondSatellite,
-  },
-  null,
-  { position: "topleft", collapsed: false }
-).addTo(carte);
+let controleCouches = null;
 
 // ==========================
 // ÉLÉMENTS UI
@@ -173,6 +154,7 @@ let toutesLesEspeces = [];
 let coucheContour = null;
 let coucheMasque = null;
 let coucheGrille = null;
+let coucheEspacesProteges = null;
 
 let lectureAutoActive = false;
 let timerLecture = null;
@@ -484,6 +466,65 @@ async function ajouterMasqueFrance() {
 }
 
 // ==========================
+// ESPACES PROTÉGÉS
+// ==========================
+function popupEspaceProtege(props = {}) {
+  return `
+    <div>
+      <div style="font-weight:700; margin-bottom:6px;">
+        ${props.nom || props.nom_complet || "Espace protégé"}
+      </div>
+      <div><b>ID MNHN :</b> ${props.id_mnhn || "—"}</div>
+      <div><b>Catégorie UICN :</b> ${props.categorie_uicn || "—"}</div>
+      <div><b>Code :</b> ${props.cd_sig || "—"}</div>
+      <div><b>Gestionnaire :</b> ${props.gestionnaire || "—"}</div>
+    </div>
+  `;
+}
+
+async function ajouterEspacesProteges() {
+  const res = await fetch(URL_EP);
+  if (!res.ok) throw new Error(`Échec du chargement de ${URL_EP} : ${res.status}`);
+  const geo = await res.json();
+
+  if (coucheEspacesProteges) {
+    carte.removeLayer(coucheEspacesProteges);
+  }
+
+  coucheEspacesProteges = L.geoJSON(geo, {
+    interactive: false,
+    style: () => ({
+      stroke: false,
+      fillColor: "#10b763",
+      fillOpacity: 0.20,
+    }),
+  });
+
+  coucheEspacesProteges.addTo(carte);
+  coucheEspacesProteges.bringToBack();
+}
+
+function initialiserControleCouches() {
+  if (controleCouches) {
+    carte.removeControl(controleCouches);
+  }
+
+  const overlays = {};
+  if (coucheEspacesProteges) {
+    overlays["Espaces protégés"] = coucheEspacesProteges;
+  }
+
+  controleCouches = L.control.layers(
+    {
+      "Clair": fondClair,
+      "Satellite": fondSatellite,
+    },
+    overlays,
+    { position: "topleft", collapsed: false }
+  ).addTo(carte);
+}
+
+// ==========================
 // INDEX DES ESPÈCES
 // ==========================
 function construireIndexEspeces(features) {
@@ -640,8 +681,8 @@ function afficherCarte(annee, mode, especeSelectionnee) {
     },
   }).addTo(carte);
 
-  coucheGrille.bringToFront();
-  if (coucheContour) coucheContour.bringToFront();
+  if (coucheEspacesProteges) coucheEspacesProteges.bringToBack();
+  if (coucheGrille) coucheGrille.bringToFront();
 }
 
 // ==========================
@@ -905,21 +946,21 @@ function construireGalerieEspeces() {
   galerieEspeces.innerHTML = "";
 
   ESPECES_UI.forEach((espece) => {
-    const carte = document.createElement("div");
-    carte.className = "species-thumb";
-    carte.dataset.value = espece.value;
+    const carteThumb = document.createElement("div");
+    carteThumb.className = "species-thumb";
+    carteThumb.dataset.value = espece.value;
 
-    carte.innerHTML = `
+    carteThumb.innerHTML = `
       <img src="${espece.image}" alt="${espece.value}">
       <div class="label">${espece.value}</div>
     `;
 
-    carte.addEventListener("click", () => {
+    carteThumb.addEventListener("click", () => {
       selectEspece.value = espece.value;
       rafraichir();
     });
 
-    galerieEspeces.appendChild(carte);
+    galerieEspeces.appendChild(carteThumb);
   });
 }
 
@@ -932,6 +973,7 @@ function mettreAJourGalerieActive() {
     element.classList.toggle("active", element.dataset.value === valeurSelectionnee);
   });
 }
+
 // ==========================
 // RAFRAÎCHISSEMENT GLOBAL
 // ==========================
@@ -985,6 +1027,8 @@ function basculerLecture() {
 // ==========================
 async function main() {
   await ajouterMasqueFrance();
+  await ajouterEspacesProteges();
+  initialiserControleCouches();
 
   {
     const res = await fetch(URL_GRILLE);
@@ -1066,6 +1110,6 @@ async function main() {
 main().catch((error) => {
   console.error(error);
   alert(
-    `${error.message}\n\nConseils :\n- Lance le projet avec Live Server ou python -m http.server\n- Vérifie les chemins des GeoJSON\n- Vérifie que phasianidae_full_grid.geojson contient bien year, cd_sig et les champs espèce`
+    `${error.message}\n\nConseils :\n- Lance le projet avec Live Server ou python -m http.server\n- Vérifie les chemins des GeoJSON\n- Vérifie que phasianidae_full_grid.geojson contient bien year, cd_sig et les champs espèce\n- Vérifie que sig_metrop.geojson est bien présent`
   );
 });
