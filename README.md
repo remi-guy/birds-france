@@ -27,11 +27,12 @@ pip install -r requirements.txt
 
 ### 4. Construire le dataset enrichi
 
-Lancer les deux principaux scripts :
+Lancer les principaux scripts :
 
 ```bash
 python src/build_full_dataset_grid.py
 python src/filter_phasianidae.py
+python src/convert_ep_to_geojson.py
 ```
 
 Le premier script va :
@@ -50,6 +51,12 @@ Le second script permet de se concentrer sur les 5 espèces de tétraonidés pr�
 
 Fichiers générés dans `data/processed` :
 - `phasianidae_filtered.geojson`
+
+Le troisième script va convertir les données d'espace protégés en un fichier geojson simplifié pour en faire un calque sur la visualisation principale.
+
+Fichiers générés dans `data/processed` :
+- `sig_metrop.geojson`
+
 
 
 ### 5. Lancer le dashboard
