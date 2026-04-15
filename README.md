@@ -36,7 +36,7 @@ git clone https://github.com/remi-guy/birds-france.git
 ```
 python -m venv .venv    
 source .venv/bin/activate   
-pip install -r requirements
+pip install -r requirements.txt
 ```
 
 ---
