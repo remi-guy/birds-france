@@ -21,6 +21,26 @@ Le site web interactif permet :
 
 ---
 
+## Lancer le projet
+
+- Cloner le dépot : 
+
+Dans un terminal :
+
+```
+git clone https://github.com/remi-guy/birds-france.git
+```
+
+- Créer un environnement virtuel :
+
+```
+python -m venv .venv    
+source .venv/bin/activate   
+pip install -r requirements
+```
+
+---
+
 ##  Reproduire les données
 
 **Les données utilisées par le site sont déjà présentes dans `web/data/`**. 
