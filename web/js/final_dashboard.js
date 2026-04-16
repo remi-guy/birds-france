@@ -130,7 +130,6 @@ const valeurTotal = document.getElementById("countValue");
 
 const rechercheEspece = document.getElementById("speciesSearch");
 const selectEspece = document.getElementById("speciesSelect");
-const selectTri = document.getElementById("sortSelect");
 const selectMode = document.getElementById("modeSelect");
 
 const boutonPlay = document.getElementById("playBtn");
@@ -547,20 +546,11 @@ function construireIndexEspeces(features) {
 
 function rafraichirSelectEspece() {
   const requete = (rechercheEspece.value || "").trim().toLowerCase();
-  const modeTri = selectTri.value || "count";
   const valeurPrecedente = selectEspece.value || "__ALL__";
 
   let especesFiltrees = toutesLesEspeces.filter((nom) =>
     nom.toLowerCase().includes(requete)
   );
-
-  if (modeTri === "count") {
-    especesFiltrees.sort(
-      (a, b) => (compteParEspece.get(b) || 0) - (compteParEspece.get(a) || 0)
-    );
-  } else {
-    especesFiltrees.sort((a, b) => a.localeCompare(b, "fr"));
-  }
 
   selectEspece.innerHTML = "";
 
@@ -1083,10 +1073,10 @@ async function main() {
     rafraichir();
   });
 
-  selectTri.addEventListener("change", () => {
-    rafraichirSelectEspece();
-    rafraichir();
-  });
+  // selectTri.addEventListener("change", () => {
+  //   rafraichirSelectEspece();
+  //   rafraichir();
+  // });
 
   rechercheEspece.addEventListener("input", () => {
     rafraichirSelectEspece();
